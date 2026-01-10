@@ -1,0 +1,38 @@
+# IDE（集成开发环境）
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Python（Python 相关文件）
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# AstrBot（AstrBot 相关目录）
+AstrBot/
+astrbot/
+
+# OS（操作系统文件）
+.DS_Store
+Thumbs.db
+
+# Logs（日志文件）
+*.log
