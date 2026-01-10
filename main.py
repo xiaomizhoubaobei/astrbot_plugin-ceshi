@@ -102,7 +102,7 @@ class AIImage(Star):
         Yields:
             帮助信息
         """
-        async for result in help_command(event):
+        async for result in help_command(self, event):
             yield result
 
     @ai_gitee_group.command("generate")
