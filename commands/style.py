@@ -116,22 +116,23 @@ async def style_command(
         image_paths = await extract_images_from_message(event)
         plugin.debug_log(f"[风格转换命令] 检测到 {len(image_paths)} 张图片")
 
-        # 解析提示词和目标尺寸
-        try:
-            prompt, target_size = parse_prompt_and_size(plugin, prompt)
-        except ValueError as e:
-            plugin.debug_log(f"[风格转换命令] 参数解析失败: {e}")
-            yield event.plain_result(f"{e}。使用方法：/ai-gitee style <风格名称> [自定义描述] [比例]")
-            return
-
         # 获取风格提示词
         style_prompt = STYLE_PROMPTS[style_name]
         plugin.debug_log(f"[风格转换命令] 使用风格: {style_name}")
 
-        # 合并用户自定义描述
+        # 解析提示词和目标尺寸
+        target_size = plugin.api_client.default_size
         if prompt:
-            final_prompt = f"{prompt}, {style_prompt}"
+            # 如果用户提供了自定义描述，则解析提示词和比例
+            try:
+                prompt, target_size = parse_prompt_and_size(plugin, prompt)
+                final_prompt = f"{prompt}, {style_prompt}"
+            except ValueError as e:
+                plugin.debug_log(f"[风格转换命令] 参数解析失败: {e}")
+                yield event.plain_result(f"{e}。使用方法：/ai-gitee style <风格名称> [自定义描述] [比例]")
+                return
         else:
+            # 如果用户没有提供自定义描述，直接使用风格提示词
             final_prompt = style_prompt
 
         plugin.debug_log(
