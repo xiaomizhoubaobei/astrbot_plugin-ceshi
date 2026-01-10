@@ -9,7 +9,7 @@ from typing import Any, AsyncGenerator
 from astrbot.api import logger
 from astrbot.api.event import AstrMessageEvent
 from astrbot.api.message_components import Image, Plain
-from core import check_rate_limit, parse_prompt_and_size
+from ..core import check_rate_limit, parse_prompt_and_size
 
 
 async def generate_image_command(
