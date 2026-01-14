@@ -9,6 +9,7 @@ from .text2image import list_models_command
 from .help import help_command
 from .ai_edit import ai_edit_image_command
 from .style import style_command
+from .image2image import image2image_command
 
 __all__ = [
     "generate_image_command",
@@ -17,4 +18,5 @@ __all__ = [
     "help_command",
     "ai_edit_image_command",
     "style_command",
+    "image2image_command",
 ]

@@ -1,4 +1,4 @@
-# AstrBot AI 图像生成插件 （有免费额度）
+# AstrBot AI 图像生成插件
 
 [![Language](https://img.shields.io/badge/Python-3.12-blue.svg)](https://www.python.org/downloads/release/python-3120/)
 [![License](https://img.shields.io/github/license/xiaomizhoubaobei/astrbot_plugin_models_ai)](LICENSE)
@@ -41,7 +41,10 @@
 
 - 📖 [快速开始](docs/getting-started.md) - 安装插件并获取 API Key
 - ⚙️ [配置说明](docs/configuration.md) - 详细的配置选项和最佳实践
-- 🎨 [使用指南](docs/user-guide.md) - 指令调用和自然语言调用方法
+- 🎨 [使用指南](docs/user-guide.md) - 指令调用方法
+- 🎭 [AI 图片编辑指南](docs/ai-edit-guide.md) - AI 图片编辑功能详解
+- 📐 [文生图功能说明](docs/generate-guide.md) - 文生图功能详解
+- 🎨 [风格转换指南](docs/style-guide.md) - 风格转换功能详解（84种风格）
 - 📐 [支持的图像尺寸](docs/image-sizes.md) - 所有支持的图片尺寸和比例
 - 🖼️ [出图展示区](docs/examples.md) - 生成示例和提示词技巧
 

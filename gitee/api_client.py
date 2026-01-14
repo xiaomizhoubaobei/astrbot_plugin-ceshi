@@ -444,6 +444,132 @@ class GiteeAIClient:
 
         raise RuntimeError(f"任务超时（已等待 {timeout} 秒）")
 
+    async def image2image(
+        self,
+        prompt: str,
+        image_path: str,
+        steps: int = 25,
+        guidance_scale: float = 6.0,
+        height: int = 1024,
+        download_urls: bool = False,
+    ) -> str:
+        """使用参照图生成图片（图生图）
+
+        Args:
+            prompt: 生成提示词
+            image_path: 参照图片路径（支持本地路径或 URL）
+            steps: 推理步数
+            guidance_scale: 引导系数
+            height: 图片高度
+            download_urls: 是否下载 URL 图片后再上传（默认 False，直接传 base64）
+
+        Returns:
+            生成的图片本地文件路径
+
+        Raises:
+            Exception: API 调用失败时抛出异常
+        """
+        self.debug_log(
+            f"开始图生图: prompt={prompt[:50]}..., "
+            f"image={image_path}, steps={steps}, guidance_scale={guidance_scale}, height={height}"
+        )
+
+        api_key = self._get_next_api_key()
+        client = self.client_manager.get_openai_client(api_key)
+        session = await self.client_manager.get_http_session()
+
+        # 读取图片并转为 base64
+        if image_path.startswith(("http://", "https://")):
+            if download_urls:
+                # 下载远程图片
+                response = await session.get(image_path, timeout=10)
+                response.raise_for_status()
+                image_bytes = await response.read()
+            else:
+                # 直接使用 URL
+                image_bytes = None
+        else:
+            # 读取本地图片
+            with open(image_path, "rb") as f:
+                image_bytes = f.read()
+
+        # 构建 base64 字符串
+        import base64
+        if image_bytes:
+            import mimetypes
+            import os
+            mime_type, _ = mimetypes.guess_type(image_path)
+            image_base64 = base64.b64encode(image_bytes).decode('utf-8')
+            image_data = f"data:{mime_type or 'image/png'};base64,{image_base64}"
+        else:
+            image_data = image_path
+
+        # 构建请求参数
+        extra_body: dict[str, Any] = {
+            "image": image_data,
+            "height": height,
+            "steps": steps,
+            "guidance_scale": guidance_scale,
+        }
+
+        kwargs: dict[str, Any] = {
+            "prompt": prompt,
+            "model": "Kolors",
+            "size": "1024x1024",
+            "extra_body": extra_body,
+        }
+
+        self.debug_log("发送图生图请求")
+
+        try:
+            response = await client.images.generate(**kwargs)  # type: ignore
+            self.debug_log("API 响应接收成功")
+        except AuthenticationError as e:
+            self.debug_log(f"API 认证失败: {e}")
+            raise RuntimeError("API Key 无效或已过期，请检查配置。") from e
+        except RateLimitError as e:
+            self.debug_log(f"API 速率限制: {e}")
+            raise RuntimeError("API 调用次数超限或并发过高，请稍后再试。") from e
+        except APIError as e:
+            self.debug_log(f"API 错误: {e}")
+            if e.status_code == 500:
+                raise RuntimeError("Gitee AI 服务器内部错误，请稍后再试。") from e
+            raise RuntimeError(f"API调用失败: {e}") from e
+        except Exception as e:
+            self.debug_log(f"未知错误: {e}")
+            raise RuntimeError(f"API调用失败: {e}") from e
+
+        if not response.data:  # type: ignore
+            raise RuntimeError("生成图片失败：未返回数据")
+
+        image_data = response.data[0]  # type: ignore
+
+        # 检查图片数据是否包含 url 属性
+        if hasattr(image_data, "url") and image_data.url:
+            self.debug_log("图片数据格式: URL")
+            filepath = await self.image_manager.download_image(image_data.url, session)
+        elif hasattr(image_data, "b64_json") and image_data.b64_json:
+            self.debug_log("图片数据格式: Base64")
+            filepath = await self.image_manager.save_base64_image(image_data.b64_json)
+        else:
+            raise RuntimeError("生成图片失败：未返回 URL 或 Base64 数据")
+
+        self.debug_log(f"图片保存成功: {filepath}")
+
+        # 每 N 次生成执行一次清理
+        from ..core import CLEANUP_INTERVAL
+        
+        self._generation_count += 1
+        if self._generation_count >= CLEANUP_INTERVAL:
+            self._generation_count = 0
+            self.debug_log("触发图片清理任务")
+            task = asyncio.create_task(self.image_manager.cleanup_old_images())
+            # 保存任务引用防止 GC 回收
+            self._background_tasks.add(task)
+            task.add_done_callback(self._background_tasks.discard)
+
+        return filepath
+
     async def close(self) -> None:
         """清理资源"""
         self.debug_log("开始清理 API 客户端资源")

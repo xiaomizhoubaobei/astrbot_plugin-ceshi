@@ -101,14 +101,14 @@ async def ai_edit_image_command(
 
         start_time = time.time()
 
-        # 调用 API 编辑图片
+        # 调用 API 编辑图片，使用配置中的默认值
         image_path = await plugin.api_client.edit_image(
             prompt=prompt,
             image_paths=image_paths,
             task_types=task_types,
-            model="Qwen-Image-Edit-2511",
-            num_inference_steps=4,
-            guidance_scale=1.0,
+            model=plugin.config.get("edit_model", "Qwen-Image-Edit-2511"),
+            num_inference_steps=plugin.config.get("edit_steps", 4),
+            guidance_scale=plugin.config.get("edit_guidance_scale", 1.0),
             download_urls=plugin.download_image_urls,
         )
 

@@ -8,7 +8,7 @@ from typing import Any, AsyncGenerator
 from astrbot.api import logger
 from astrbot.api.event import AstrMessageEvent, filter as filter_cmd
 from astrbot.api.star import Context, Star
-from .commands import generate_image_command, list_models_command, help_command, switch_model_command, ai_edit_image_command, style_command
+from .commands import generate_image_command, list_models_command, help_command, switch_model_command, ai_edit_image_command, style_command, image2image_command
 from .core import (
     DEFAULT_BASE_URL,
     DEFAULT_INFERENCE_STEPS,
@@ -51,11 +51,22 @@ class AIImage(Star):
         default_size = config.get("size", DEFAULT_SIZE)
         num_inference_steps = config.get("num_inference_steps", DEFAULT_INFERENCE_STEPS)
         negative_prompt = config.get("negative_prompt", DEFAULT_NEGATIVE_PROMPT)
+        
+        # 图生图相关配置
+        image2image_model = config.get("image2image_model", "Kolors")
+        image2image_steps = config.get("image2image_steps", 25)
+        image2image_guidance_scale = config.get("image2image_guidance_scale", 6.0)
+        
+        # AI 编辑相关配置
+        edit_model = config.get("edit_model", "Qwen-Image-Edit-2511")
+        edit_steps = config.get("edit_steps", 4)
+        edit_guidance_scale = config.get("edit_guidance_scale", 1.0)
 
         self.debug_log(
             f"配置解析完成: model={model}, size={default_size}, "
             f"api_keys_count={len(api_keys)}, debug_mode={self.debug_mode}, "
-            f"download_image_urls={self.download_image_urls}"
+            f"download_image_urls={self.download_image_urls}, "
+            f"image2image_model={image2image_model}, edit_model={edit_model}"
         )
 
         # 初始化组件
@@ -279,6 +290,39 @@ class AIImage(Star):
             生成的风格转换图片或错误消息
         """
         async for result in style_command(self, event, style_name, prompt):
+            yield result
+
+    @ai_gitee_group.command("image2image")
+    async def image2image_command_wrapper(
+        self, event: "AstrMessageEvent", prompt: str = "", steps: int = None, guidance_scale: float = None
+    ) -> AsyncGenerator[Any, None]:
+        """图生图命令（使用参照图生成图片）
+
+        使用 Gitee AI 的图生图功能，根据参照图生成相同风格的新图片。
+
+        用法: /ai-gitee image2image <提示词> [steps] [guidance_scale]
+
+        参数:
+        - 提示词: 描述你想要的生成效果
+        - steps: 推理步数（可选，默认使用配置中的 image2image_steps）
+        - guidance_scale: 引导系数（可选，默认使用配置中的 image2image_guidance_scale）
+
+        示例:
+          /ai-gitee image2image 生成一张相同风格的图片
+          /ai-gitee image2image 保持人物特征，改变背景 30 7.5
+
+        注意: 发送命令时请同时附上参照图片（仅支持单张图片）
+
+        Args:
+            event: 消息事件对象
+            prompt: 生成提示词
+            steps: 推理步数
+            guidance_scale: 引导系数
+
+        Yields:
+            生成的图片或错误消息
+        """
+        async for result in image2image_command(self, event, prompt, steps, guidance_scale):
             yield result
 
     async def close(self) -> None:

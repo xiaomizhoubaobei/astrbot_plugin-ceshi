@@ -1,45 +1,105 @@
 {
-    "api_key": {
-        "description": "API 密钥 (支持多 Key 轮询)",
-        "type": "list",
-        "hint": "Gitee AI API Key，支持配置多个 Key 以实现轮询调用",
-        "default": [],
-        "obvious_hint": true
-    },
-    "model": {
-        "description": "使用的模型名称",
-        "type": "string",
-        "default": "z-image-turbo",
-        "hint": "例如: z-image-turbo"
-    },
-    "size": {
-        "description": "图片大小",
-        "type": "string",
-        "default": "1024x1024",
-        "hint": "例如: 1024x1024"
-    },
-    "num_inference_steps": {
-        "description": "推理步数",
-        "type": "int",
-        "default": 9,
-        "hint": "推理步数，默认 9"
-    },
-    "negative_prompt": {
-        "description": "负面提示词",
-        "type": "string",
-        "default": "",
-        "hint": "用于指定不希望出现在生成图片中的内容"
-    },
-    "debug_mode": {
-        "description": "启用 Debug 日志",
-        "type": "bool",
-        "default": false,
-        "hint": "开启后输出详细的 Debug 日志，便于调试和问题诊断"
-    },
-    "download_image_urls": {
-        "description": "下载图片 URL",
-        "type": "bool",
-        "default": false,
-        "hint": "为 false 时直接将图片 URL 传递给 API（推荐）；为 true 时先下载图片再上传"
-    }
+  "api_key": {
+    "description": "API 密钥 (支持多 Key 轮询)",
+    "type": "list",
+    "hint": "Gitee AI API Key，支持配置多个 Key 以实现轮询调用",
+    "default": [],
+    "obvious_hint": true
+  },
+  "model": {
+    "description": "文本生图模型名称",
+    "type": "string",
+    "default": "Z-Image-Turbo",
+    "hint": "选择用于文本生成图像的AI模型",
+    "options": [
+      "CogView4-6B",
+      "FLUX.1-dev",
+      "FLUX.1-Krea-dev",
+      "FLUX.1-schnell",
+      "FLUX.2-dev",
+      "HiDream-I1-Full",
+      "HunyuanDiT-v1.1-Diffusers-Distilled",
+      "Kolors",
+      "LongCat-Image",
+      "Qwen-Image",
+      "Qwen-Image-Edit",
+      "Qwen-Image-Edit-2511",
+      "stable-diffusion-3-medium",
+      "stable-diffusion-3.5-large-turbo",
+      "stable-diffusion-xl-base-1.0",
+      "Z-Image-Turbo"
+    ]
+  },
+  "image2image_model": {
+    "description": "图生图模型名称（使用参照图生成图片）",
+    "type": "string",
+    "default": "Kolors",
+    "hint": "选择用于图生图的AI模型",
+    "options": [
+      "Kolors",
+      "FLUX.1-Kontext-dev",
+      "FLUX.1-Dev",
+      "HiDream-E1-Full"
+    ]
+  },
+  "edit_model": {
+    "description": "AI 图片编辑模型名称",
+    "type": "string",
+    "default": "Qwen-Image-Edit-2511",
+    "hint": "例如: Qwen-Image-Edit-2511"
+  },
+  "size": {
+    "description": "图片大小",
+    "type": "string",
+    "default": "1024x1024",
+    "hint": "例如: 1024x1024"
+  },
+  "num_inference_steps": {
+    "description": "推理步数",
+    "type": "int",
+    "default": 9,
+    "hint": "推理步数，默认 9"
+  },
+  "image2image_steps": {
+    "description": "图生图推理步数",
+    "type": "int",
+    "default": 25,
+    "hint": "图生图推理步数，默认 25"
+  },
+  "image2image_guidance_scale": {
+    "description": "图生图引导系数",
+    "type": "float",
+    "default": 6.0,
+    "hint": "图生图引导系数，默认 6.0"
+  },
+  "edit_steps": {
+    "description": "AI 图片编辑推理步数",
+    "type": "int",
+    "default": 4,
+    "hint": "AI 图片编辑推理步数，默认 4"
+  },
+  "edit_guidance_scale": {
+    "description": "AI 图片编辑引导系数",
+    "type": "float",
+    "default": 1.0,
+    "hint": "AI 图片编辑引导系数，默认 1.0"
+  },
+  "negative_prompt": {
+    "description": "负面提示词",
+    "type": "string",
+    "default": "",
+    "hint": "用于指定不希望出现在生成图片中的内容"
+  },
+  "debug_mode": {
+    "description": "启用 Debug 日志",
+    "type": "bool",
+    "default": false,
+    "hint": "开启后输出详细的 Debug 日志，便于调试和问题诊断"
+  },
+  "download_image_urls": {
+    "description": "下载图片 URL",
+    "type": "bool",
+    "default": false,
+    "hint": "为 false 时直接将图片 URL 传递给 API（推荐）；为 true 时先下载图片再上传"
+  }
 }
