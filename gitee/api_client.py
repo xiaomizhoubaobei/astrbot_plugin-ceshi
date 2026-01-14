@@ -496,27 +496,20 @@ class GiteeAIClient:
         # 构建 base64 字符串
         import base64
         if image_bytes:
-            import mimetypes
-            import os
-            mime_type, _ = mimetypes.guess_type(image_path)
             image_base64 = base64.b64encode(image_bytes).decode('utf-8')
-            image_data = f"data:{mime_type or 'image/png'};base64,{image_base64}"
+            image_data = image_base64
         else:
             image_data = image_path
 
         # 构建请求参数
-        extra_body: dict[str, Any] = {
-            "image": image_data,
-            "height": height,
-            "steps": steps,
-            "guidance_scale": guidance_scale,
-        }
-
         kwargs: dict[str, Any] = {
             "prompt": prompt,
             "model": "Kolors",
             "size": "1024x1024",
-            "extra_body": extra_body,
+            "image": image_data,
+            "height": height,
+            "steps": steps,
+            "guidance_scale": guidance_scale,
         }
 
         self.debug_log("发送图生图请求")
